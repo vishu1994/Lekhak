@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8006:8006"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5176:5176"
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:8006
+    depends_on:
+      - backend

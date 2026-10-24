@@ -18,6 +18,20 @@ export function GraduationCapIcon() {
   )
 }
 
+export function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M6.5 18.5c.8-2.4 2.8-3.5 5.5-3.5s4.7 1.1 5.5 3.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function MailIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">

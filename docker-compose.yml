@@ -4,6 +4,13 @@ services:
     ports:
       - "8006:8006"
 
+    environment:
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: lekhak_admin
+      MINIO_SECRET_KEY: Lekhak@123!
+      MINIO_BUCKET: lekhak-audio-file
+      MINIO_SECURE: "false"
+
   frontend:
     build: ./frontend
     ports:
@@ -12,3 +19,18 @@ services:
       VITE_API_PROXY_TARGET: http://backend:8006
     depends_on:
       - backend
+  
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: lekhak_admin
+      MINIO_ROOT_PASSWORD: Lekhak@123!
+    volumes:
+      - minio_data:/data
+
+volumes:
+  minio_data:

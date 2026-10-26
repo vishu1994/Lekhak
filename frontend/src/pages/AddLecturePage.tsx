@@ -10,12 +10,14 @@ import {
 type AddLecturePageProps = {
   initialUrl: string
   onHome: () => void
+  onMyLectures: () => void
   onLectureAdded: () => void
 }
 
 function AddLecturePage({
   initialUrl,
   onHome,
+  onMyLectures,
   onLectureAdded,
 }: AddLecturePageProps) {
   const [url, setUrl] = useState(initialUrl)
@@ -70,7 +72,7 @@ function AddLecturePage({
   const showPreview = loading || error || video
 
   return (
-    <AppShell activeItem="home" onHome={onHome}>
+    <AppShell activeItem="home" onHome={onHome} onMyLectures={onMyLectures}>
       <PageHeading
         title="3. Add a Lecture"
         subtitle="Paste a link, check it is the right video, then start"

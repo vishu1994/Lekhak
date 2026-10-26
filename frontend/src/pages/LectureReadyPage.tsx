@@ -8,7 +8,7 @@ type LectureReadyPageProps = {
 
 function LectureReadyPage({ onHome, onMyLectures }: LectureReadyPageProps) {
   return (
-    <AppShell activeItem="home" onHome={onHome}>
+    <AppShell activeItem="home" onHome={onHome} onMyLectures={onMyLectures}>
       <PageHeading
         title="Getting Your Lecture Ready"
         subtitle="Simple waiting screen; the user can leave and come back"

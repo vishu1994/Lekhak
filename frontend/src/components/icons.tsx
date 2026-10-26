@@ -213,6 +213,168 @@ export function HourglassIcon({ className = "h-6 w-6" }: IconProps) {
   )
 }
 
+export function ExternalLinkIcon({
+  className = "h-4 w-4 shrink-0",
+}: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M14 5h5v5M19 5l-9 9"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17 13.5V18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function NotesIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M7 3.5h7l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14 3.5V8h4.5M8.5 12h7M8.5 16h5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function FlashcardsIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="7"
+        y="6"
+        width="12"
+        height="14"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M6 16.5 4.8 8.2A2 2 0 0 1 6.7 6L16 4.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function QuizIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="5"
+        y="3.5"
+        width="14"
+        height="17"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="m8.5 12 1.6 1.6 3.2-3.4M8.5 16.5h7"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function AskIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M11.2 3.2 12.6 8.2 17.6 9.6 12.6 11 11.2 16 9.8 11 4.8 9.6 9.8 8.2 11.2 3.2Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M18 14.4 18.7 16.5 20.8 17.2 18.7 17.9 18 20 17.3 17.9 15.2 17.2 17.3 16.5 18 14.4Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function FilledCheckIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9" fill="currentColor" />
+      <path
+        d="m8.2 12.2 2.4 2.4 5.2-5.4"
+        fill="none"
+        stroke="white"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function LockIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">

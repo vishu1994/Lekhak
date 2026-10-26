@@ -16,8 +16,12 @@ const lectures: Lecture[] = []
 
 function HomePage({
   onStartLearning,
+  onHome,
+  onMyLectures,
 }: {
   onStartLearning: (url: string) => void
+  onHome: () => void
+  onMyLectures: () => void
 }) {
   const [url, setUrl] = useState("")
 
@@ -32,7 +36,7 @@ function HomePage({
   }
 
   return (
-    <AppShell activeItem="home" onHome={() => {}}>
+    <AppShell activeItem="home" onHome={onHome} onMyLectures={onMyLectures}>
       <PageHeading
         title="2. Home"
         subtitle="Paste a YouTube link to start learning, or pick up where you left off"
@@ -74,6 +78,7 @@ function HomePage({
           </h2>
           <button
             type="button"
+            onClick={onMyLectures}
             className="cursor-pointer text-sm font-medium text-blue-600"
           >
             See all

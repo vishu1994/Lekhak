@@ -3,7 +3,7 @@ import AuthLayout, { AuthCardHeader } from "../components/AuthLayout"
 import TextField from "../components/TextField"
 import { LockIcon, MailIcon, UserIcon } from "../components/icons"
 
-function SignupPage({ onLogin }) {
+function SignupPage({ onLogin, onEnter }) {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -11,6 +11,7 @@ function SignupPage({ onLogin }) {
 
   function handleSubmit(event) {
     event.preventDefault()
+    onEnter()
   }
 
   return (
@@ -66,11 +67,11 @@ function SignupPage({ onLogin }) {
           />
           <span>
             I agree to the{" "}
-            <button type="button" className="font-medium text-blue-600 hover:text-blue-700">
+            <button type="button" className="cursor-pointer font-medium text-blue-600 hover:text-blue-700">
               Terms
             </button>{" "}
             and{" "}
-            <button type="button" className="font-medium text-blue-600 hover:text-blue-700">
+            <button type="button" className="cursor-pointer font-medium text-blue-600 hover:text-blue-700">
               Privacy Policy
             </button>
           </span>
@@ -78,7 +79,7 @@ function SignupPage({ onLogin }) {
 
         <button
           type="submit"
-          className="mt-1 w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="mt-1 w-full cursor-pointer rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
         >
           Create account
         </button>
@@ -89,7 +90,7 @@ function SignupPage({ onLogin }) {
         <button
           type="button"
           onClick={onLogin}
-          className="font-semibold text-blue-600 hover:text-blue-700"
+          className="cursor-pointer font-semibold text-blue-600 hover:text-blue-700"
         >
           Login
         </button>

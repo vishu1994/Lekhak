@@ -72,7 +72,39 @@ describe("lecture flow", () => {
     ).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Go to My Lectures" }))
+    expect(
+      screen.getByRole("heading", { name: "5. Your Lecture is Ready" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "React Complete Course" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Ready")).toBeInTheDocument()
+    expect(
+      screen.getByText("What React is and why people use it"),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: /watch on youtube/i }),
+    ).toHaveAttribute("target", "_blank")
+
+    await user.click(screen.getByRole("tab", { name: "Notes" }))
+    expect(screen.queryByText("Quick summary")).not.toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Home" }))
     expect(screen.getByRole("heading", { name: "2. Home" })).toBeInTheDocument()
+  })
+
+  it("opens the ready lecture from the My Lectures sidebar", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+
+    expect(
+      screen.getByRole("heading", { name: "5. Your Lecture is Ready" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Using state and hooks")).toBeInTheDocument()
   })
 
   it("shows the preview error when YouTube cannot be reached", async () => {

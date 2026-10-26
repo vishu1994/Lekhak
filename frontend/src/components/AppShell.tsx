@@ -10,12 +10,18 @@ const navItemClass =
   "flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium"
 
 type AppShellProps = {
-  activeItem: "home"
+  activeItem: "home" | "lectures"
   onHome: () => void
+  onMyLectures: () => void
   children: ReactNode
 }
 
-function AppShell({ activeItem, onHome, children }: AppShellProps) {
+function AppShell({
+  activeItem,
+  onHome,
+  onMyLectures,
+  children,
+}: AppShellProps) {
   return (
     <div className="flex min-h-svh bg-[#f3f5f9] text-slate-900">
       <aside className="flex w-56 shrink-0 flex-col bg-[#1b2d4a] px-4 py-5 text-white">
@@ -39,7 +45,12 @@ function AppShell({ activeItem, onHome, children }: AppShellProps) {
           </button>
           <button
             type="button"
-            className={`${navItemClass} text-slate-300 hover:bg-white/10`}
+            onClick={onMyLectures}
+            className={`${navItemClass} ${
+              activeItem === "lectures"
+                ? "bg-blue-600 text-white"
+                : "text-slate-300 hover:bg-white/10"
+            }`}
           >
             <LecturesIcon />
             My Lectures

@@ -1,3 +1,16 @@
+import type { ChangeEvent, ReactNode } from "react"
+
+type TextFieldProps = {
+  id: string
+  label: string
+  type?: string
+  placeholder?: string
+  value: string
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+  icon: ReactNode
+  autoComplete?: string
+}
+
 function TextField({
   id,
   label,
@@ -7,10 +20,13 @@ function TextField({
   onChange,
   icon,
   autoComplete,
-}) {
+}: TextFieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-slate-900">
+      <label
+        htmlFor={id}
+        className="mb-2 block text-sm font-medium text-slate-900"
+      >
         {label}
       </label>
       <div className="relative">

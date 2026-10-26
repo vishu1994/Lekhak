@@ -1,15 +1,20 @@
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
 import AuthLayout, { AuthCardHeader } from "../components/AuthLayout"
 import TextField from "../components/TextField"
 import { LockIcon, MailIcon, UserIcon } from "../components/icons"
 
-function SignupPage({ onLogin, onEnter }) {
+type SignupPageProps = {
+  onLogin: () => void
+  onEnter: () => void
+}
+
+function SignupPage({ onLogin, onEnter }: SignupPageProps) {
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [acceptedTerms, setAcceptedTerms] = useState(false)
 
-  function handleSubmit(event) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     onEnter()
   }
@@ -55,7 +60,9 @@ function SignupPage({ onLogin, onEnter }) {
             onChange={(event) => setPassword(event.target.value)}
             icon={<LockIcon />}
           />
-          <p className="mt-1.5 text-xs text-slate-500">Use at least 8 characters</p>
+          <p className="mt-1.5 text-xs text-slate-500">
+            Use at least 8 characters
+          </p>
         </div>
 
         <label className="flex items-start gap-2 text-sm text-slate-700">
@@ -67,11 +74,17 @@ function SignupPage({ onLogin, onEnter }) {
           />
           <span>
             I agree to the{" "}
-            <button type="button" className="cursor-pointer font-medium text-blue-600 hover:text-blue-700">
+            <button
+              type="button"
+              className="cursor-pointer font-medium text-blue-600 hover:text-blue-700"
+            >
               Terms
             </button>{" "}
             and{" "}
-            <button type="button" className="cursor-pointer font-medium text-blue-600 hover:text-blue-700">
+            <button
+              type="button"
+              className="cursor-pointer font-medium text-blue-600 hover:text-blue-700"
+            >
               Privacy Policy
             </button>
           </span>

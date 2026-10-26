@@ -1,36 +1,59 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import AppShell, { PageHeading } from "../components/AppShell"
 import { CheckIcon, LinkIcon } from "../components/icons"
-import { fetchYouTubeDetails, youtubeVideoId } from "../youtube"
+import {
+  fetchYouTubeDetails,
+  youtubeVideoId,
+  type YouTubePreview,
+} from "../youtube"
 
-function AddLecturePage({ initialUrl, onHome }) {
+type AddLecturePageProps = {
+  initialUrl: string
+  onHome: () => void
+  onLectureAdded: () => void
+}
+
+function AddLecturePage({
+  initialUrl,
+  onHome,
+  onLectureAdded,
+}: AddLecturePageProps) {
   const [url, setUrl] = useState(initialUrl)
-  const [video, setVideo] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [video, setVideo] = useState<YouTubePreview | null>(null)
+  const [loading, setLoading] = useState(() =>
+    Boolean(youtubeVideoId(initialUrl)),
+  )
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    const videoId = youtubeVideoId(url)
-    if (!videoId) {
+  function changeUrl(nextUrl: string) {
+    setUrl(nextUrl)
+    if (!youtubeVideoId(nextUrl)) {
       setVideo(null)
       setLoading(false)
       setError("")
       return
     }
-
-    let cancelled = false
     setLoading(true)
     setError("")
+  }
 
+  useEffect(() => {
+    if (!youtubeVideoId(url)) return
+
+    let cancelled = false
     const timer = setTimeout(() => {
       fetchYouTubeDetails(url)
         .then((details) => {
           if (!cancelled) setVideo(details)
         })
-        .catch((loadError) => {
+        .catch((loadError: unknown) => {
           if (!cancelled) {
             setVideo(null)
-            setError(loadError.message)
+            setError(
+              loadError instanceof Error
+                ? loadError.message
+                : "This YouTube link could not be loaded.",
+            )
           }
         })
         .finally(() => {
@@ -54,7 +77,10 @@ function AddLecturePage({ initialUrl, onHome }) {
       />
 
       <form
-        onSubmit={(event) => event.preventDefault()}
+        onSubmit={(event: FormEvent<HTMLFormElement>) => {
+          event.preventDefault()
+          if (youtubeVideoId(url)) onLectureAdded()
+        }}
         className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
       >
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-900">
@@ -69,7 +95,7 @@ function AddLecturePage({ initialUrl, onHome }) {
             </span>
             <input
               value={url}
-              onChange={(event) => setUrl(event.target.value)}
+              onChange={(event) => changeUrl(event.target.value)}
               placeholder="https://www.youtube.com/watch?v=abc123"
               className="w-full rounded-lg border border-slate-300 py-2.5 pr-3 pl-10 text-sm outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
@@ -102,7 +128,11 @@ function AddLecturePage({ initialUrl, onHome }) {
             )}
           </div>
 
-          {loading && <p className="mt-4 text-sm text-slate-500">Loading video details…</p>}
+          {loading && (
+            <p className="mt-4 text-sm text-slate-500">
+              Loading video details…
+            </p>
+          )}
           {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
           {video && (
@@ -117,7 +147,9 @@ function AddLecturePage({ initialUrl, onHome }) {
                 <h3 className="text-xl font-semibold text-[#1e3a8a]">
                   {video.title || "YouTube video"}
                 </h3>
-                {video.channel && <p className="mt-1 text-sm text-slate-500">{video.channel}</p>}
+                {video.channel && (
+                  <p className="mt-1 text-sm text-slate-500">{video.channel}</p>
+                )}
                 <p className="mt-4 border-t border-slate-200 pt-4 text-sm text-slate-500">
                   {video.embeddable
                     ? "We'll get this lecture ready for you. It usually takes a few minutes and you can leave the page while you wait."

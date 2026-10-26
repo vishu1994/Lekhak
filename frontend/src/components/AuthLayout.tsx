@@ -1,6 +1,13 @@
+import type { ReactNode } from "react"
 import { GraduationCapIcon } from "./icons"
 
-function AuthLayout({ stepTitle, stepSubtitle, children }) {
+type AuthLayoutProps = {
+  stepTitle: string
+  stepSubtitle: string
+  children: ReactNode
+}
+
+function AuthLayout({ stepTitle, stepSubtitle, children }: AuthLayoutProps) {
   return (
     <main className="min-h-svh bg-[#f3f5f9] px-8 py-7 text-slate-900">
       <header>
@@ -15,13 +22,21 @@ function AuthLayout({ stepTitle, stepSubtitle, children }) {
   )
 }
 
-export function AuthCardHeader({ title, subtitle }) {
+export function AuthCardHeader({
+  title,
+  subtitle,
+}: {
+  title: string
+  subtitle: string
+}) {
   return (
     <div className="mb-6 text-center">
       <div className="mb-3 flex justify-center text-blue-600">
         <GraduationCapIcon />
       </div>
-      <h2 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h2>
+      <h2 className="text-2xl font-bold tracking-tight text-slate-900">
+        {title}
+      </h2>
       <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
     </div>
   )

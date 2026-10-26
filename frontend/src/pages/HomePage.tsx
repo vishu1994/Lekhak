@@ -1,19 +1,32 @@
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
 import AppShell, { PageHeading } from "../components/AppShell"
 import { LecturesIcon, LinkIcon, PlayIcon } from "../components/icons"
 import { youtubeVideoId } from "../youtube"
 
-const lectures = []
+type LectureStatus = "Ready" | "Getting ready"
 
-function HomePage({ onStartLearning }) {
+type Lecture = {
+  id: string
+  title: string
+  duration: string
+  status: LectureStatus
+}
+
+const lectures: Lecture[] = []
+
+function HomePage({
+  onStartLearning,
+}: {
+  onStartLearning: (url: string) => void
+}) {
   const [url, setUrl] = useState("")
 
-  function openLecture(nextUrl) {
+  function openLecture(nextUrl: string) {
     if (!youtubeVideoId(nextUrl)) return
     onStartLearning(nextUrl.trim())
   }
 
-  function handleSubmit(event) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     openLecture(url)
   }
@@ -59,7 +72,10 @@ function HomePage({ onStartLearning }) {
             <LecturesIcon />
             Your lectures
           </h2>
-          <button type="button" className="cursor-pointer text-sm font-medium text-blue-600">
+          <button
+            type="button"
+            className="cursor-pointer text-sm font-medium text-blue-600"
+          >
             See all
           </button>
         </div>
@@ -74,7 +90,7 @@ function HomePage({ onStartLearning }) {
   )
 }
 
-function LectureRow({ lecture }) {
+function LectureRow({ lecture }: { lecture: Lecture }) {
   const statusClass =
     lecture.status === "Getting ready"
       ? "bg-amber-100 text-amber-700"
@@ -89,7 +105,9 @@ function LectureRow({ lecture }) {
         <p className="font-semibold text-slate-900">{lecture.title}</p>
         <p className="text-xs text-slate-500">{lecture.duration}</p>
       </div>
-      <span className={`rounded-full px-3 py-1 text-xs font-medium ${statusClass}`}>
+      <span
+        className={`rounded-full px-3 py-1 text-xs font-medium ${statusClass}`}
+      >
         {lecture.status}
       </span>
       <span className="text-slate-400">›</span>

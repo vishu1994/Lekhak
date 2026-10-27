@@ -88,10 +88,44 @@ describe("lecture flow", () => {
 
     await user.click(screen.getByRole("tab", { name: "Notes" }))
     expect(screen.queryByText("Quick summary")).not.toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "6. Notes" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("1. Introduction to React")).toBeInTheDocument()
+    expect(screen.getByText("useEffect")).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Home" }))
     expect(screen.getByRole("heading", { name: "2. Home" })).toBeInTheDocument()
+  })
+
+  it("edits lecture notes and restores them", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    await user.click(screen.getByRole("tab", { name: "Notes" }))
+    await user.click(screen.getByRole("button", { name: "Edit" }))
+    expect(
+      screen.getByRole("toolbar", { name: "Note formatting" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Bold" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Highlight" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("textbox", { name: "Lecture notes" }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Download" }))
+    expect(screen.getByRole("menuitem", { name: "PDF" })).toBeInTheDocument()
+    expect(screen.getByRole("menuitem", { name: "Doc" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Redo notes" }))
+    expect(screen.getByText("1. Introduction to React")).toBeInTheDocument()
+    expect(
+      screen.queryByRole("toolbar", { name: "Note formatting" }),
+    ).not.toBeInTheDocument()
   })
 
   it("opens the ready lecture from the My Lectures sidebar", async () => {

@@ -353,6 +353,88 @@ export function AskIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   )
 }
 
+export function PencilIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 20h4l11-11-4-4L4 16v4Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m13.5 6.5 4 4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function CopyIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="8"
+        y="8"
+        width="11"
+        height="12"
+        rx="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M6 16H5.5A1.5 1.5 0 0 1 4 14.5v-9A1.5 1.5 0 0 1 5.5 4h8A1.5 1.5 0 0 1 15 5.5V6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function DownloadIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 4v10m0 0 3.5-3.5M12 14 8.5 10.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 18h14"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function FilledCheckIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   return (
     <svg

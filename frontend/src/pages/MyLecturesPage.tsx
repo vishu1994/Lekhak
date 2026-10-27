@@ -10,6 +10,7 @@ import {
   PlayIcon,
   QuizIcon,
 } from "../components/icons"
+import Notes from "./Notes"
 
 type LectureTab = "overview" | "notes" | "flashcards" | "quiz" | "ask"
 
@@ -36,6 +37,12 @@ const readyLecture: ReadyLecture = {
   ],
 }
 
+const sectionCopy: Record<Exclude<LectureTab, "overview" | "notes">, string> = {
+  flashcards: "Flashcards from this lecture appear here.",
+  quiz: "A quiz from this lecture appears here.",
+  ask: "Questions about this lecture appear here.",
+}
+
 const tabs: { id: LectureTab; label: string; icon: typeof HomeIcon }[] = [
   { id: "overview", label: "Overview", icon: HomeIcon },
   { id: "notes", label: "Notes", icon: NotesIcon },
@@ -44,13 +51,6 @@ const tabs: { id: LectureTab; label: string; icon: typeof HomeIcon }[] = [
   { id: "ask", label: "Ask AI", icon: AskIcon },
 ]
 
-const sectionCopy: Record<Exclude<LectureTab, "overview">, string> = {
-  notes: "Notes from this lecture appear here.",
-  flashcards: "Flashcards from this lecture appear here.",
-  quiz: "A quiz from this lecture appears here.",
-  ask: "Questions about this lecture appear here.",
-}
-
 type MyLecturesPageProps = {
   onHome: () => void
   onMyLectures: () => void
@@ -58,13 +58,20 @@ type MyLecturesPageProps = {
 
 function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
   const [tab, setTab] = useState<LectureTab>("overview")
+  const heading =
+    tab === "notes"
+      ? {
+          title: "6. Notes",
+          subtitle: "Clear, organised notes you can read, edit and download",
+        }
+      : {
+          title: "5. Your Lecture is Ready",
+          subtitle: "Everything for one lecture in one place",
+        }
 
   return (
     <AppShell activeItem="lectures" onHome={onHome} onMyLectures={onMyLectures}>
-      <PageHeading
-        title="5. Your Lecture is Ready"
-        subtitle="Everything for one lecture in one place"
-      />
+      <PageHeading title={heading.title} subtitle={heading.subtitle} />
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between gap-4">
@@ -132,9 +139,9 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
         aria-labelledby={`${tab}-tab`}
         className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
       >
-        {tab === "overview" ? (
-          <Overview lecture={readyLecture} />
-        ) : (
+        {tab === "overview" && <Overview lecture={readyLecture} />}
+        {tab === "notes" && <Notes />}
+        {tab !== "overview" && tab !== "notes" && (
           <>
             <h2 className="text-sm font-semibold text-slate-900">
               {tabs.find((item) => item.id === tab)?.label}

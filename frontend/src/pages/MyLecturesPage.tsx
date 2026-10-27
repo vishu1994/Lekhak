@@ -10,6 +10,7 @@ import {
   PlayIcon,
   QuizIcon,
 } from "../components/icons"
+import Flashcards from "./Flashcards"
 import Notes from "./Notes"
 
 type LectureTab = "overview" | "notes" | "flashcards" | "quiz" | "ask"
@@ -37,8 +38,10 @@ const readyLecture: ReadyLecture = {
   ],
 }
 
-const sectionCopy: Record<Exclude<LectureTab, "overview" | "notes">, string> = {
-  flashcards: "Flashcards from this lecture appear here.",
+const sectionCopy: Record<
+  Exclude<LectureTab, "overview" | "notes" | "flashcards">,
+  string
+> = {
   quiz: "A quiz from this lecture appears here.",
   ask: "Questions about this lecture appear here.",
 }
@@ -64,10 +67,15 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
           title: "6. Notes",
           subtitle: "Clear, organised notes you can read, edit and download",
         }
-      : {
-          title: "5. Your Lecture is Ready",
-          subtitle: "Everything for one lecture in one place",
-        }
+      : tab === "flashcards"
+        ? {
+            title: "7. Flashcards",
+            subtitle: "Flip through cards to remember what you learned",
+          }
+        : {
+            title: "5. Your Lecture is Ready",
+            subtitle: "Everything for one lecture in one place",
+          }
 
   return (
     <AppShell activeItem="lectures" onHome={onHome} onMyLectures={onMyLectures}>
@@ -133,23 +141,34 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
         </div>
       </section>
 
-      <section
-        role="tabpanel"
-        id={`${tab}-panel`}
-        aria-labelledby={`${tab}-tab`}
-        className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-      >
-        {tab === "overview" && <Overview lecture={readyLecture} />}
-        {tab === "notes" && <Notes />}
-        {tab !== "overview" && tab !== "notes" && (
-          <>
-            <h2 className="text-sm font-semibold text-slate-900">
-              {tabs.find((item) => item.id === tab)?.label}
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">{sectionCopy[tab]}</p>
-          </>
-        )}
-      </section>
+      {tab === "flashcards" ? (
+        <section
+          role="tabpanel"
+          id="flashcards-panel"
+          aria-labelledby="flashcards-tab"
+          className="mt-4"
+        >
+          <Flashcards />
+        </section>
+      ) : (
+        <section
+          role="tabpanel"
+          id={`${tab}-panel`}
+          aria-labelledby={`${tab}-tab`}
+          className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          {tab === "overview" && <Overview lecture={readyLecture} />}
+          {tab === "notes" && <Notes />}
+          {tab !== "overview" && tab !== "notes" && (
+            <>
+              <h2 className="text-sm font-semibold text-slate-900">
+                {tabs.find((item) => item.id === tab)?.label}
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">{sectionCopy[tab]}</p>
+            </>
+          )}
+        </section>
+      )}
     </AppShell>
   )
 }

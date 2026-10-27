@@ -268,6 +268,27 @@ export function NotesIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   )
 }
 
+export function EyeIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M2.5 12S6 6.5 12 6.5 21.5 12 21.5 12 18 17.5 12 17.5 2.5 12 2.5 12Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="12" r="2.5" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  )
+}
+
 export function FlashcardsIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   return (
     <svg

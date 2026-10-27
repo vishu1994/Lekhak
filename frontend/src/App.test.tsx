@@ -128,6 +128,53 @@ describe("lecture flow", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("reveals a flashcard answer and moves through the deck", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    await user.click(screen.getByRole("tab", { name: "Flashcards" }))
+
+    expect(
+      screen.getByRole("heading", { name: "7. Flashcards" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Card 1 of 15")).toBeInTheDocument()
+    expect(
+      screen.getByText("What is the purpose of useState in React?"),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(/useState lets a component remember a value/),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Show answer" }))
+    expect(
+      screen.getByText(
+        "useState lets a component remember a value and update the screen when that value changes.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(screen.getByText("Card 2 of 15")).toBeInTheDocument()
+    expect(screen.getByText("What is a component?")).toBeInTheDocument()
+    expect(
+      screen.queryByText(/useState lets a component remember a value/),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByText("What is a component?"))
+    expect(
+      screen.getByText(
+        "A component is a reusable piece of the interface, usually a function that returns elements.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Previous" }))
+    expect(screen.getByText("Card 1 of 15")).toBeInTheDocument()
+    expect(
+      screen.getByText("What is the purpose of useState in React?"),
+    ).toBeInTheDocument()
+  })
+
   it("opens the ready lecture from the My Lectures sidebar", async () => {
     const user = userEvent.setup()
     render(<App />)

@@ -175,6 +175,36 @@ describe("lecture flow", () => {
     ).toBeInTheDocument()
   })
 
+  it("checks a quiz answer and moves to the next question", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    await user.click(screen.getByRole("tab", { name: "Quiz" }))
+
+    expect(screen.getByRole("heading", { name: "Quiz" })).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "8. Quiz" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("Question 1 of 10")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "What is the correct way to create a functional component?",
+      }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText("function Component() {}"))
+    await user.click(screen.getByRole("button", { name: "Check answer" }))
+    expect(screen.getByText("Correct")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Next question" }))
+    expect(screen.getByText("Question 2 of 10")).toBeInTheDocument()
+    expect(
+      screen.getByText("Which hook remembers a value that can change?"),
+    ).toBeInTheDocument()
+  })
+
   it("opens the ready lecture from the My Lectures sidebar", async () => {
     const user = userEvent.setup()
     render(<App />)

@@ -407,6 +407,76 @@ export function QuizIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   )
 }
 
+export function BotIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="5"
+        y="8"
+        width="14"
+        height="10"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M12 8V5M9 13h.01M15 13h.01M9 16h6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+export function MessageIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M6 7.5h12A1.5 1.5 0 0 1 19.5 9v6A1.5 1.5 0 0 1 18 16.5H10l-4 3v-3H6A1.5 1.5 0 0 1 4.5 15V9A1.5 1.5 0 0 1 6 7.5Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function SendIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M5 12h11M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export function AskIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   return (
     <svg

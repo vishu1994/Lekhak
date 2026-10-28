@@ -10,6 +10,7 @@ import {
   PlayIcon,
   QuizIcon,
 } from "../components/icons"
+import AskAI from "./AskAI"
 import Flashcards from "./Flashcards"
 import Notes from "./Notes"
 import Quiz from "./Quiz"
@@ -37,13 +38,6 @@ const readyLecture: ReadyLecture = {
     "How components and props work",
     "Using state and hooks",
   ],
-}
-
-const sectionCopy: Record<
-  Exclude<LectureTab, "overview" | "notes" | "flashcards" | "quiz">,
-  string
-> = {
-  ask: "Questions about this lecture appear here.",
 }
 
 const tabs: { id: LectureTab; label: string; icon: typeof HomeIcon }[] = [
@@ -83,10 +77,16 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
                 title: "Quiz",
                 subtitle: "Test yourself with simple multiple-choice questions",
               }
-            : {
-                title: "5. Your Lecture is Ready",
-                subtitle: "Everything for one lecture in one place",
-              }
+            : tab === "ask"
+              ? {
+                  title: "Ask AI",
+                  subtitle:
+                    "Ask questions about this lecture and get simple answers",
+                }
+              : {
+                  title: "5. Your Lecture is Ready",
+                  subtitle: "Everything for one lecture in one place",
+                }
 
   return (
     <AppShell activeItem="lectures" onHome={onHome} onMyLectures={onMyLectures}>
@@ -155,7 +155,7 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
         </div>
       </section>
 
-      {tab === "flashcards" ? (
+      {tab === "flashcards" && (
         <section
           role="tabpanel"
           id="flashcards-panel"
@@ -164,7 +164,18 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
         >
           <Flashcards />
         </section>
-      ) : (
+      )}
+      {tab === "ask" && (
+        <section
+          role="tabpanel"
+          id="ask-panel"
+          aria-labelledby="ask-tab"
+          className="mt-4"
+        >
+          <AskAI watchUrl={readyLecture.watchUrl} />
+        </section>
+      )}
+      {tab !== "flashcards" && tab !== "ask" && (
         <section
           role="tabpanel"
           id={`${tab}-panel`}
@@ -174,14 +185,6 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
           {tab === "overview" && <Overview lecture={readyLecture} />}
           {tab === "notes" && <Notes />}
           {tab === "quiz" && <Quiz onViewChange={setQuizView} />}
-          {tab !== "overview" && tab !== "notes" && tab !== "quiz" && (
-            <>
-              <h2 className="text-sm font-semibold text-slate-900">
-                {tabs.find((item) => item.id === tab)?.label}
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">{sectionCopy[tab]}</p>
-            </>
-          )}
         </section>
       )}
     </AppShell>

@@ -205,6 +205,42 @@ describe("lecture flow", () => {
     ).toBeInTheDocument()
   })
 
+  it("shows the quiz score and lets you try again", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    await user.click(screen.getByRole("tab", { name: "Quiz" }))
+
+    for (let question = 0; question < 10; question += 1) {
+      await user.click(screen.getAllByRole("radio")[0])
+      await user.click(screen.getByRole("button", { name: "Check answer" }))
+      if (question < 9) {
+        await user.click(screen.getByRole("button", { name: "Next question" }))
+      }
+    }
+
+    await user.click(screen.getByRole("button", { name: "See results" }))
+    expect(
+      screen.getByRole("heading", { name: "Quiz Result" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "9. Quiz Result" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("4 / 10")).toBeInTheDocument()
+    expect(screen.getByText("Worth another look")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "Q1. What is the correct way to create a functional component?",
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Try again" }))
+    expect(screen.getByRole("heading", { name: "Quiz" })).toBeInTheDocument()
+    expect(screen.getByText("Question 1 of 10")).toBeInTheDocument()
+  })
+
   it("opens the ready lecture from the My Lectures sidebar", async () => {
     const user = userEvent.setup()
     render(<App />)

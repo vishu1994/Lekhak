@@ -61,6 +61,7 @@ type MyLecturesPageProps = {
 
 function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
   const [tab, setTab] = useState<LectureTab>("overview")
+  const [quizView, setQuizView] = useState<"questions" | "result">("questions")
   const heading =
     tab === "notes"
       ? {
@@ -72,15 +73,20 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
             title: "7. Flashcards",
             subtitle: "Flip through cards to remember what you learned",
           }
-        : tab === "quiz"
+        : tab === "quiz" && quizView === "result"
           ? {
-              title: "Quiz",
-              subtitle: "Test yourself with simple multiple-choice questions",
+              title: "Quiz Result",
+              subtitle: "Friendly score and a way to review or retry",
             }
-          : {
-              title: "5. Your Lecture is Ready",
-              subtitle: "Everything for one lecture in one place",
-            }
+          : tab === "quiz"
+            ? {
+                title: "Quiz",
+                subtitle: "Test yourself with simple multiple-choice questions",
+              }
+            : {
+                title: "5. Your Lecture is Ready",
+                subtitle: "Everything for one lecture in one place",
+              }
 
   return (
     <AppShell activeItem="lectures" onHome={onHome} onMyLectures={onMyLectures}>
@@ -131,7 +137,10 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
                 id={`${item.id}-tab`}
                 aria-selected={selected}
                 aria-controls={`${item.id}-panel`}
-                onClick={() => setTab(item.id)}
+                onClick={() => {
+                  setTab(item.id)
+                  if (item.id !== "quiz") setQuizView("questions")
+                }}
                 className={`flex cursor-pointer items-center gap-2.5 rounded-xl px-4 py-2.5 text-base font-medium ${
                   selected
                     ? "bg-blue-50 text-blue-700"
@@ -164,7 +173,7 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
         >
           {tab === "overview" && <Overview lecture={readyLecture} />}
           {tab === "notes" && <Notes />}
-          {tab === "quiz" && <Quiz />}
+          {tab === "quiz" && <Quiz onViewChange={setQuizView} />}
           {tab !== "overview" && tab !== "notes" && tab !== "quiz" && (
             <>
               <h2 className="text-sm font-semibold text-slate-900">

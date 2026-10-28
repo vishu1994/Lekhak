@@ -241,6 +241,50 @@ describe("lecture flow", () => {
     expect(screen.getByText("Question 1 of 10")).toBeInTheDocument()
   })
 
+  it("answers a lecture question from Ask AI", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    await user.click(screen.getByRole("tab", { name: "Ask AI" }))
+
+    expect(screen.getByRole("heading", { name: "Ask AI" })).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "10. Ask AI" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByText("Explain the difference between props and state."),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Props are values a component receives/),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: /Watch this part/ }),
+    ).toHaveAttribute("target", "_blank")
+
+    await user.click(
+      screen.getByRole("button", { name: "Summarise this lecture" }),
+    )
+    expect(
+      screen.getByText(
+        "This lecture introduces React, then components and props, and finishes with state and hooks.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.type(
+      screen.getByLabelText("Ask a question about this lecture"),
+      "What is a component?",
+    )
+    await user.click(screen.getByRole("button", { name: "Send" }))
+    expect(screen.getByText("What is a component?")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "This lecture covers that idea in the sections on components, props, and hooks.",
+      ),
+    ).toBeInTheDocument()
+  })
+
   it("opens the ready lecture from the My Lectures sidebar", async () => {
     const user = userEvent.setup()
     render(<App />)

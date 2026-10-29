@@ -6,16 +6,19 @@ import {
   FilledCheckIcon,
   FlashcardsIcon,
   HomeIcon,
+  LecturesIcon,
   NotesIcon,
   PlayIcon,
   QuizIcon,
 } from "../components/icons"
 import AskAI from "./AskAI"
 import Flashcards from "./Flashcards"
+import LecturesPage from "./LecturesPage"
 import Notes from "./Notes"
 import Quiz from "./Quiz"
 
-type LectureTab = "overview" | "notes" | "flashcards" | "quiz" | "ask"
+type LectureTab =
+  "lectures" | "overview" | "notes" | "flashcards" | "quiz" | "ask"
 
 type ReadyLecture = {
   title: string
@@ -41,6 +44,7 @@ const readyLecture: ReadyLecture = {
 }
 
 const tabs: { id: LectureTab; label: string; icon: typeof HomeIcon }[] = [
+  { id: "lectures", label: "All lectures", icon: LecturesIcon },
   { id: "overview", label: "Overview", icon: HomeIcon },
   { id: "notes", label: "Notes", icon: NotesIcon },
   { id: "flashcards", label: "Flashcards", icon: FlashcardsIcon },
@@ -54,77 +58,85 @@ type MyLecturesPageProps = {
 }
 
 function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
-  const [tab, setTab] = useState<LectureTab>("overview")
+  const [tab, setTab] = useState<LectureTab>("lectures")
   const [quizView, setQuizView] = useState<"questions" | "result">("questions")
   const heading =
-    tab === "notes"
+    tab === "lectures"
       ? {
-          title: "6. Notes",
-          subtitle: "Clear, organised notes you can read, edit and download",
+          title: "My Lectures",
+          subtitle: "All your lectures in one place",
         }
-      : tab === "flashcards"
+      : tab === "notes"
         ? {
-            title: "7. Flashcards",
-            subtitle: "Flip through cards to remember what you learned",
+            title: "6. Notes",
+            subtitle: "Clear, organised notes you can read, edit and download",
           }
-        : tab === "quiz" && quizView === "result"
+        : tab === "flashcards"
           ? {
-              title: "Quiz Result",
-              subtitle: "Friendly score and a way to review or retry",
+              title: "7. Flashcards",
+              subtitle: "Flip through cards to remember what you learned",
             }
-          : tab === "quiz"
+          : tab === "quiz" && quizView === "result"
             ? {
-                title: "Quiz",
-                subtitle: "Test yourself with simple multiple-choice questions",
+                title: "Quiz Result",
+                subtitle: "Friendly score and a way to review or retry",
               }
-            : tab === "ask"
+            : tab === "quiz"
               ? {
-                  title: "Ask AI",
+                  title: "Quiz",
                   subtitle:
-                    "Ask questions about this lecture and get simple answers",
+                    "Test yourself with simple multiple-choice questions",
                 }
-              : {
-                  title: "5. Your Lecture is Ready",
-                  subtitle: "Everything for one lecture in one place",
-                }
+              : tab === "ask"
+                ? {
+                    title: "Ask AI",
+                    subtitle:
+                      "Ask questions about this lecture and get simple answers",
+                  }
+                : {
+                    title: "5. Your Lecture is Ready",
+                    subtitle: "Everything for one lecture in one place",
+                  }
 
   return (
     <AppShell activeItem="lectures" onHome={onHome} onMyLectures={onMyLectures}>
       <PageHeading title={heading.title} subtitle={heading.subtitle} />
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-              <PlayIcon />
-            </span>
-            <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-slate-900">
-                {readyLecture.title}
-              </h2>
-              <p className="text-sm text-slate-500">
-                {readyLecture.duration}{" "}
-                <span className="font-medium text-green-600">
-                  {readyLecture.status}
-                </span>
-              </p>
+        {tab !== "lectures" && (
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                <PlayIcon />
+              </span>
+              <div className="min-w-0">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  {readyLecture.title}
+                </h2>
+                <p className="text-sm text-slate-500">
+                  {readyLecture.duration}{" "}
+                  <span className="font-medium text-green-600">
+                    {readyLecture.status}
+                  </span>
+                </p>
+              </div>
             </div>
+            <a
+              href={readyLecture.watchUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
+            >
+              <ExternalLinkIcon className="h-3 w-3 shrink-0" />
+              Watch on YouTube
+            </a>
           </div>
-          <a
-            href={readyLecture.watchUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex shrink-0 items-center gap-1 rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
-          >
-            <ExternalLinkIcon className="h-3 w-3 shrink-0" />
-            Watch on YouTube
-          </a>
-        </div>
+        )}
 
         <div
           role="tablist"
           aria-label="Lecture sections"
-          className="mt-5 flex flex-wrap items-center gap-2"
+          className="flex flex-wrap items-center gap-2"
         >
           {tabs.map((item) => {
             const Icon = item.icon
@@ -155,6 +167,16 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
         </div>
       </section>
 
+      {tab === "lectures" && (
+        <div
+          role="tabpanel"
+          id="lectures-panel"
+          aria-labelledby="lectures-tab"
+          className="mt-4"
+        >
+          <LecturesPage />
+        </div>
+      )}
       {tab === "flashcards" && (
         <section
           role="tabpanel"
@@ -175,7 +197,7 @@ function MyLecturesPage({ onHome, onMyLectures }: MyLecturesPageProps) {
           <AskAI watchUrl={readyLecture.watchUrl} />
         </section>
       )}
-      {tab !== "flashcards" && tab !== "ask" && (
+      {tab !== "lectures" && tab !== "flashcards" && tab !== "ask" && (
         <section
           role="tabpanel"
           id={`${tab}-panel`}

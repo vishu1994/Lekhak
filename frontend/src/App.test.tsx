@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import App from "./App"
+import MyLecturesPage from "./pages/MyLecturesPage"
 
 const videoUrl = "https://youtu.be/gsI5Pw2Y63U"
 
@@ -73,26 +74,13 @@ describe("lecture flow", () => {
 
     await user.click(screen.getByRole("button", { name: "Go to My Lectures" }))
     expect(
-      screen.getByRole("heading", { name: "5. Your Lecture is Ready" }),
+      screen.getByRole("heading", { name: "My Lectures" }),
     ).toBeInTheDocument()
+    expect(screen.getByLabelText("Search your lectures")).toBeInTheDocument()
     expect(
-      screen.getByRole("heading", { name: "React Complete Course" }),
+      screen.getByRole("columnheader", { name: "Lecture" }),
     ).toBeInTheDocument()
-    expect(screen.getByText("Ready")).toBeInTheDocument()
-    expect(
-      screen.getByText("What React is and why people use it"),
-    ).toBeInTheDocument()
-    expect(
-      screen.getByRole("link", { name: /watch on youtube/i }),
-    ).toHaveAttribute("target", "_blank")
-
-    await user.click(screen.getByRole("tab", { name: "Notes" }))
-    expect(screen.queryByText("Quick summary")).not.toBeInTheDocument()
-    expect(
-      screen.getByRole("heading", { name: "6. Notes" }),
-    ).toBeInTheDocument()
-    expect(screen.getByText("1. Introduction to React")).toBeInTheDocument()
-    expect(screen.getByText("useEffect")).toBeInTheDocument()
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Home" }))
     expect(screen.getByRole("heading", { name: "2. Home" })).toBeInTheDocument()
@@ -100,10 +88,8 @@ describe("lecture flow", () => {
 
   it("edits lecture notes and restores them", async () => {
     const user = userEvent.setup()
-    render(<App />)
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
 
-    await user.click(screen.getByRole("button", { name: "Login" }))
-    await user.click(screen.getByRole("button", { name: "My Lectures" }))
     await user.click(screen.getByRole("tab", { name: "Notes" }))
     await user.click(screen.getByRole("button", { name: "Edit" }))
     expect(
@@ -130,10 +116,8 @@ describe("lecture flow", () => {
 
   it("reveals a flashcard answer and moves through the deck", async () => {
     const user = userEvent.setup()
-    render(<App />)
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
 
-    await user.click(screen.getByRole("button", { name: "Login" }))
-    await user.click(screen.getByRole("button", { name: "My Lectures" }))
     await user.click(screen.getByRole("tab", { name: "Flashcards" }))
 
     expect(
@@ -177,10 +161,8 @@ describe("lecture flow", () => {
 
   it("checks a quiz answer and moves to the next question", async () => {
     const user = userEvent.setup()
-    render(<App />)
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
 
-    await user.click(screen.getByRole("button", { name: "Login" }))
-    await user.click(screen.getByRole("button", { name: "My Lectures" }))
     await user.click(screen.getByRole("tab", { name: "Quiz" }))
 
     expect(screen.getByRole("heading", { name: "Quiz" })).toBeInTheDocument()
@@ -207,10 +189,8 @@ describe("lecture flow", () => {
 
   it("shows the quiz score and lets you try again", async () => {
     const user = userEvent.setup()
-    render(<App />)
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
 
-    await user.click(screen.getByRole("button", { name: "Login" }))
-    await user.click(screen.getByRole("button", { name: "My Lectures" }))
     await user.click(screen.getByRole("tab", { name: "Quiz" }))
 
     for (let question = 0; question < 10; question += 1) {
@@ -243,10 +223,8 @@ describe("lecture flow", () => {
 
   it("answers a lecture question from Ask AI", async () => {
     const user = userEvent.setup()
-    render(<App />)
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
 
-    await user.click(screen.getByRole("button", { name: "Login" }))
-    await user.click(screen.getByRole("button", { name: "My Lectures" }))
     await user.click(screen.getByRole("tab", { name: "Ask AI" }))
 
     expect(screen.getByRole("heading", { name: "Ask AI" })).toBeInTheDocument()
@@ -285,17 +263,59 @@ describe("lecture flow", () => {
     ).toBeInTheDocument()
   })
 
-  it("opens the ready lecture from the My Lectures sidebar", async () => {
+  it("shows an empty My Lectures list", async () => {
     const user = userEvent.setup()
     render(<App />)
 
     await user.click(screen.getByRole("button", { name: "Login" }))
-    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    await user.click(screen.getByRole("button", { name: "See all" }))
 
     expect(
-      screen.getByRole("heading", { name: "5. Your Lecture is Ready" }),
+      screen.getByRole("heading", { name: "My Lectures" }),
     ).toBeInTheDocument()
-    expect(screen.getByText("Using state and hooks")).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "11. My Lectures" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByLabelText("Search your lectures")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(
+      screen.getByRole("columnheader", { name: "Length" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Status" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+    expect(screen.queryByText("React Complete Course")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Ready" }))
+    expect(screen.getByRole("button", { name: "Ready" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+
+    await user.click(screen.getByRole("tab", { name: "Notes" }))
+    expect(
+      screen.getByRole("heading", { name: "6. Notes" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("1. Introduction to React")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("tab", { name: "All lectures" }))
+    expect(
+      screen.getByRole("heading", { name: "My Lectures" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+    expect(screen.queryByText("React Complete Course")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Home" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+    expect(screen.getByRole("tab", { name: "All lectures" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
   })
 
   it("shows the preview error when YouTube cannot be reached", async () => {

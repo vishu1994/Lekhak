@@ -132,6 +132,27 @@ export function SettingsIcon({ className = "h-4 w-4" }: IconProps) {
   )
 }
 
+export function SearchIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      className={className}
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="m16 16 4 4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function LinkIcon({ className = "h-4 w-4 shrink-0" }: IconProps) {
   return (
     <svg

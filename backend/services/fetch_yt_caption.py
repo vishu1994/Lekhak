@@ -15,13 +15,28 @@ from exceptions.fetch_caption import (
     CaptionsDisabledError,
 )
 
+class FetchedTranscript:
+    def __init__(self, raw_result):
+        self.raw_result = raw_result
 
-# 1. Define the Protocol for the returned transcript object
-class FetchedTranscriptProtocol(Protocol):
-    language_code: str
-    is_generated: bool
+    @property
+    def language_code(self) -> str:
+        return self.raw_result.language_code
 
-    def to_raw_data(self) -> list[dict[str, Any]]: ...
+    @property
+    def is_generated(self) -> bool:
+        return self.raw_result.is_generated
+
+    def to_raw_data(self) -> list[dict[str, Any]]:
+        return [
+            {
+                "text": segment.text,
+                "start": segment.start,
+                "duration": segment.duration,
+            }
+            for segment in self.raw_result
+        ]
+
 
 
 # 2. Define the Protocol for the injected API dependency
@@ -31,7 +46,22 @@ class TranscriptApiProtocol(Protocol):
         video_id: str,
         languages: Iterable[str] = ("en",),
         preserve_formatting: bool = False,
-    ) -> FetchedTranscriptProtocol: ...
+    ) -> FetchedTranscript: ...
+
+
+# Implement the adapter based on library
+class YoutubeTranscriptionApiLibrary:
+    def __init__(self):
+        self.library = YouTubeTranscriptApi()
+
+    def fetch(
+        self,
+        video_id: str,
+        languages: Iterable[str] = ("en",),
+        preserve_formatting: bool = False,
+    ) -> FetchedTranscript:
+        raw_result = self.library.fetch(video_id, languages=list(languages))
+        return FetchedTranscript(raw_result)
 
 
 # 3. Inject the Protocol into your provider class
@@ -41,7 +71,7 @@ class YouTubeCaptionProvider:
         self.api = api
         self.language = language
 
-    def __extract_video_id(self, video_url: str) -> str:
+    def _extract_video_id(self, video_url: str) -> str:
         parsed = urlparse(video_url)
         host = (parsed.hostname or "").lower()
 
@@ -68,7 +98,7 @@ class YouTubeCaptionProvider:
 
     def fetch(self, video_url: str) -> dict[str, Any]:
         try:
-            video_id = self.__extract_video_id(video_url)
+            video_id = self._extract_video_id(video_url)
         except ValueError as exc:
             raise InvalidYouTubeURLError(f"Invalid video URL: {exc}") from exc
 

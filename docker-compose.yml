@@ -3,6 +3,9 @@ services:
     build: ./backend
     ports:
       - "8006:8006"
+    
+    env_file:
+      - .env
 
     environment:
       MINIO_ENDPOINT: minio:9000

@@ -21,7 +21,7 @@ def hello_world():
     return {"message": "Hello, World"}
 
 
-@app.post("/api/v1/audio/download")
+# @app.post("/api/v1/audio/download") will use it when we test it
 def download_youtube_audio(request: AudioDownloadRequest):
     # Step 1: Download audio from YouTube
     try:

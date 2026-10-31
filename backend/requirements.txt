@@ -4,3 +4,4 @@ yt-dlp
 celery[redis]
 redis
 minio
+pydantic-settings

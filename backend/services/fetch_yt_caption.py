@@ -15,44 +15,38 @@ from exceptions.fetch_caption import (
     CaptionsDisabledError,
 )
 
+from dataclasses import dataclass
+
+
+@dataclass
+class TranscriptSegment:
+    text: str
+    start: float
+    duration: float
+
+@dataclass
 class FetchedTranscript:
-    def __init__(self, raw_result):
-        self.raw_result = raw_result
 
-    @property
-    def language_code(self) -> str:
-        return self.raw_result.language_code
-
-    @property
-    def is_generated(self) -> bool:
-        return self.raw_result.is_generated
-
-    def to_raw_data(self) -> list[dict[str, Any]]:
-        return [
-            {
-                "text": segment.text,
-                "start": segment.start,
-                "duration": segment.duration,
-            }
-            for segment in self.raw_result
-        ]
+    language_code: str
+    is_generated: bool
+    segments: list[TranscriptSegment]
 
 
 
 # 2. Define the Protocol for the injected API dependency
 class TranscriptApiProtocol(Protocol):
     def fetch(
-        self,
-        video_id: str,
-        languages: Iterable[str] = ("en",),
-        preserve_formatting: bool = False,
+        self, video_id: str, languages: Iterable[str] = ("en",)
     ) -> FetchedTranscript: ...
 
 
 # Implement the adapter based on library
 class YoutubeTranscriptionApiLibrary:
-    def __init__(self):
-        self.library = YouTubeTranscriptApi()
+    def __init__(self, library=None):
+        if library is None:
+            library = YouTubeTranscriptApi()
+
+        self.library = library
 
     def fetch(
         self,
@@ -61,13 +55,33 @@ class YoutubeTranscriptionApiLibrary:
         preserve_formatting: bool = False,
     ) -> FetchedTranscript:
         raw_result = self.library.fetch(video_id, languages=list(languages))
-        return FetchedTranscript(raw_result)
+
+
+        segments = [
+            TranscriptSegment(
+                text=segment.text,
+                start=segment.start,
+                duration=segment.duration,
+            )
+            for segment in raw_result
+        ]
+
+        return FetchedTranscript(
+            language_code=raw_result.language_code,
+            is_generated=raw_result.is_generated,
+            segments=segments,
+        )
+
 
 
 # 3. Inject the Protocol into your provider class
 class YouTubeCaptionProvider:
 
-    def __init__(self, api: TranscriptApiProtocol, language: str = "en"):
+    def __init__(
+        self,
+        api: TranscriptApiProtocol,
+        language: str = "en",
+    ):
         self.api = api
         self.language = language
 
@@ -96,7 +110,9 @@ class YouTubeCaptionProvider:
 
         return video_id
 
+    
     def fetch(self, video_url: str) -> dict[str, Any]:
+        print(video_url)
         try:
             video_id = self._extract_video_id(video_url)
         except ValueError as exc:
@@ -107,6 +123,8 @@ class YouTubeCaptionProvider:
                 video_id,
                 languages=[self.language],
             )
+
+            print(transcript)
 
         except NoTranscriptFound as exc:
             raise CaptionsNotFoundError(
@@ -122,5 +140,5 @@ class YouTubeCaptionProvider:
             "video_id": video_id,
             "language": transcript.language_code,
             "is_generated": transcript.is_generated,
-            "segments": transcript.to_raw_data(),
+            "segments": transcript.segments
         }

@@ -24,13 +24,13 @@ class TranscriptSegment:
     start: float
     duration: float
 
+
 @dataclass
 class FetchedTranscript:
 
     language_code: str
     is_generated: bool
     segments: list[TranscriptSegment]
-
 
 
 # 2. Define the Protocol for the injected API dependency
@@ -56,7 +56,6 @@ class YoutubeTranscriptionApiLibrary:
     ) -> FetchedTranscript:
         raw_result = self.library.fetch(video_id, languages=list(languages))
 
-
         segments = [
             TranscriptSegment(
                 text=segment.text,
@@ -71,7 +70,6 @@ class YoutubeTranscriptionApiLibrary:
             is_generated=raw_result.is_generated,
             segments=segments,
         )
-
 
 
 # 3. Inject the Protocol into your provider class
@@ -110,7 +108,6 @@ class YouTubeCaptionProvider:
 
         return video_id
 
-    
     def fetch(self, video_url: str) -> dict[str, Any]:
         print(video_url)
         try:
@@ -140,5 +137,5 @@ class YouTubeCaptionProvider:
             "video_id": video_id,
             "language": transcript.language_code,
             "is_generated": transcript.is_generated,
-            "segments": transcript.segments
+            "segments": transcript.segments,
         }

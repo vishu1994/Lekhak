@@ -1,22 +1,16 @@
 import re
-from typing import Any, Iterable, Protocol
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any, Iterable
 from urllib.parse import urlparse, parse_qs
 
 from youtube_transcript_api import YouTubeTranscriptApi
-
 from youtube_transcript_api._errors import (
     TranscriptsDisabled,
     NoTranscriptFound,
 )
 
-from exceptions.fetch_caption import (
-    InvalidYouTubeURLError,
-    CaptionsNotFoundError,
-    CaptionsDisabledError,
-)
-
-from dataclasses import dataclass
-
+from backend.exceptions.fetch_caption import CaptionsDisabledError, CaptionsNotFoundError, InvalidYouTubeURLError
 
 @dataclass
 class TranscriptSegment:
@@ -27,22 +21,34 @@ class TranscriptSegment:
 
 @dataclass
 class FetchedTranscript:
-
     language_code: str
     is_generated: bool
     segments: list[TranscriptSegment]
 
 
-# 2. Define the Protocol for the injected API dependency
-class TranscriptApiProtocol(Protocol):
+# =====================================================
+# 3. Abstract Base Class
+# =====================================================
+
+class BaseTranscriptApi(ABC):
+
+    @abstractmethod
     def fetch(
-        self, video_id: str, languages: Iterable[str] = ("en",)
-    ) -> FetchedTranscript: ...
+        self,
+        video_id: str,
+        languages: Iterable[str] = ("en",),
+    ) -> FetchedTranscript:
+        pass
 
 
-# Implement the adapter based on library
-class YoutubeTranscriptionApiLibrary:
+# =====================================================
+# 4. YouTube Adapter
+# =====================================================
+
+class YoutubeTranscriptionApiAdapter(BaseTranscriptApi):
+
     def __init__(self, library=None):
+
         if library is None:
             library = YouTubeTranscriptApi()
 
@@ -52,9 +58,23 @@ class YoutubeTranscriptionApiLibrary:
         self,
         video_id: str,
         languages: Iterable[str] = ("en",),
-        preserve_formatting: bool = False,
     ) -> FetchedTranscript:
-        raw_result = self.library.fetch(video_id, languages=list(languages))
+
+        try:
+            raw_result = self.library.fetch(
+                video_id,
+                languages=list(languages),
+            )
+
+        except NoTranscriptFound as exc:
+            raise CaptionsNotFoundError(
+                "Captions in the requested language are not available."
+            ) from exc
+
+        except TranscriptsDisabled as exc:
+            raise CaptionsDisabledError(
+                "Captions are disabled for this video."
+            ) from exc
 
         segments = [
             TranscriptSegment(
@@ -72,34 +92,44 @@ class YoutubeTranscriptionApiLibrary:
         )
 
 
-# 3. Inject the Protocol into your provider class
+# =====================================================
+# 5. YouTube Caption Provider
+# =====================================================
+
 class YouTubeCaptionProvider:
 
     def __init__(
         self,
-        api: TranscriptApiProtocol,
+        api: BaseTranscriptApi,
         language: str = "en",
     ):
         self.api = api
         self.language = language
 
     def _extract_video_id(self, video_url: str) -> str:
+
         parsed = urlparse(video_url)
         host = (parsed.hostname or "").lower()
 
         if host == "youtu.be":
+
             video_id = parsed.path.strip("/").split("/")[0]
 
         elif host == "youtube.com" or host.endswith(".youtube.com"):
+
             if parsed.path == "/watch":
                 video_id = parse_qs(parsed.query).get("v", [""])[0]
+
             else:
                 parts = parsed.path.strip("/").split("/")
+
                 video_id = (
                     parts[1]
-                    if len(parts) == 2 and parts[0] in {"shorts", "embed", "live"}
+                    if len(parts) == 2
+                    and parts[0] in {"shorts", "embed", "live"}
                     else ""
                 )
+
         else:
             raise ValueError("Unsupported YouTube URL")
 
@@ -109,29 +139,20 @@ class YouTubeCaptionProvider:
         return video_id
 
     def fetch(self, video_url: str) -> dict[str, Any]:
-        print(video_url)
+
         try:
             video_id = self._extract_video_id(video_url)
-        except ValueError as exc:
-            raise InvalidYouTubeURLError(f"Invalid video URL: {exc}") from exc
 
-        try:
-            transcript = self.api.fetch(
-                video_id,
-                languages=[self.language],
-            )
-
-            print(transcript)
-
-        except NoTranscriptFound as exc:
-            raise CaptionsNotFoundError(
-                f"Captions in {self.language} are not available."
+        except (ValueError, TypeError) as exc:
+            raise InvalidYouTubeURLError(
+                f"Invalid video URL: {exc}"
             ) from exc
 
-        except TranscriptsDisabled as exc:
-            raise CaptionsDisabledError(
-                "Captions are disabled for this video."
-            ) from exc
+        # Adapter handles third-party exceptions.
+        transcript = self.api.fetch(
+            video_id,
+            languages=[self.language],
+        )
 
         return {
             "video_id": video_id,
@@ -139,3 +160,33 @@ class YouTubeCaptionProvider:
             "is_generated": transcript.is_generated,
             "segments": transcript.segments,
         }
+
+
+# =====================================================
+# 6. Application Usage
+# =====================================================
+
+if __name__ == "__main__":
+
+    adapter = YoutubeTranscriptionApiAdapter()
+
+    provider = YouTubeCaptionProvider(
+        api=adapter,
+        language="en",
+    )
+
+    try:
+        result = provider.fetch(
+            "https://www.youtube.com/watch?v="
+        )
+
+        print(result)
+
+    except InvalidYouTubeURLError as exc:
+        print(f"Invalid URL: {exc}")
+
+    except CaptionsNotFoundError as exc:
+        print(f"Captions not found: {exc}")
+
+    except CaptionsDisabledError as exc:
+        print(f"Captions disabled: {exc}")

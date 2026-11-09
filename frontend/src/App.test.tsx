@@ -1,0 +1,338 @@
+import { render, screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import App from "./App"
+import MyLecturesPage from "./pages/MyLecturesPage"
+
+const videoUrl = "https://youtu.be/gsI5Pw2Y63U"
+
+function previewResponse() {
+  return {
+    ok: true,
+    json: async () => ({
+      title: "Async tasks",
+      author_name: "Zubair Khan",
+      thumbnail_url: "https://i.ytimg.com/vi/gsI5Pw2Y63U/hqdefault.jpg",
+    }),
+  }
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+describe("lecture flow", () => {
+  it("opens home from login and ignores a link that is not YouTube", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    expect(screen.getByRole("heading", { name: "2. Home" })).toBeInTheDocument()
+
+    await user.type(
+      screen.getByLabelText("YouTube link"),
+      "https://example.com/lesson",
+    )
+    expect(
+      screen.queryByText("Is this the right video?"),
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows a loading state, then the preview and waiting screen", async () => {
+    let resolveFetch: (
+      value: ReturnType<typeof previewResponse>,
+    ) => void = () => {}
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveFetch = resolve
+          }),
+      ),
+    )
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.type(screen.getByLabelText("YouTube link"), videoUrl)
+
+    expect(
+      await screen.findByText("Loading video details…"),
+    ).toBeInTheDocument()
+    await waitFor(() => expect(fetch).toHaveBeenCalled())
+    resolveFetch(previewResponse())
+    expect(
+      await screen.findByRole("heading", { name: "Async tasks" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Zubair Khan")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Add lecture" }))
+    expect(
+      screen.getByRole("heading", { name: "Getting your lecture ready" }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Go to My Lectures" }))
+    expect(
+      screen.getByRole("heading", { name: "My Lectures" }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText("Search your lectures")).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Lecture" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Home" }))
+    expect(screen.getByRole("heading", { name: "2. Home" })).toBeInTheDocument()
+  })
+
+  it("edits lecture notes and restores them", async () => {
+    const user = userEvent.setup()
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
+
+    await user.click(screen.getByRole("tab", { name: "Notes" }))
+    await user.click(screen.getByRole("button", { name: "Edit" }))
+    expect(
+      screen.getByRole("toolbar", { name: "Note formatting" }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Bold" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Highlight" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("textbox", { name: "Lecture notes" }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Download" }))
+    expect(screen.getByRole("menuitem", { name: "PDF" })).toBeInTheDocument()
+    expect(screen.getByRole("menuitem", { name: "Doc" })).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Redo notes" }))
+    expect(screen.getByText("1. Introduction to React")).toBeInTheDocument()
+    expect(
+      screen.queryByRole("toolbar", { name: "Note formatting" }),
+    ).not.toBeInTheDocument()
+  })
+
+  it("reveals a flashcard answer and moves through the deck", async () => {
+    const user = userEvent.setup()
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
+
+    await user.click(screen.getByRole("tab", { name: "Flashcards" }))
+
+    expect(
+      screen.getByRole("heading", { name: "7. Flashcards" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Card 1 of 15")).toBeInTheDocument()
+    expect(
+      screen.getByText("What is the purpose of useState in React?"),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(/useState lets a component remember a value/),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Show answer" }))
+    expect(
+      screen.getByText(
+        "useState lets a component remember a value and update the screen when that value changes.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Next" }))
+    expect(screen.getByText("Card 2 of 15")).toBeInTheDocument()
+    expect(screen.getByText("What is a component?")).toBeInTheDocument()
+    expect(
+      screen.queryByText(/useState lets a component remember a value/),
+    ).not.toBeInTheDocument()
+
+    await user.click(screen.getByText("What is a component?"))
+    expect(
+      screen.getByText(
+        "A component is a reusable piece of the interface, usually a function that returns elements.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Previous" }))
+    expect(screen.getByText("Card 1 of 15")).toBeInTheDocument()
+    expect(
+      screen.getByText("What is the purpose of useState in React?"),
+    ).toBeInTheDocument()
+  })
+
+  it("checks a quiz answer and moves to the next question", async () => {
+    const user = userEvent.setup()
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
+
+    await user.click(screen.getByRole("tab", { name: "Quiz" }))
+
+    expect(screen.getByRole("heading", { name: "Quiz" })).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "8. Quiz" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("Question 1 of 10")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        name: "What is the correct way to create a functional component?",
+      }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText("function Component() {}"))
+    await user.click(screen.getByRole("button", { name: "Check answer" }))
+    expect(screen.getByText("Correct")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Next question" }))
+    expect(screen.getByText("Question 2 of 10")).toBeInTheDocument()
+    expect(
+      screen.getByText("Which hook remembers a value that can change?"),
+    ).toBeInTheDocument()
+  })
+
+  it("shows the quiz score and lets you try again", async () => {
+    const user = userEvent.setup()
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
+
+    await user.click(screen.getByRole("tab", { name: "Quiz" }))
+
+    for (let question = 0; question < 10; question += 1) {
+      await user.click(screen.getAllByRole("radio")[0])
+      await user.click(screen.getByRole("button", { name: "Check answer" }))
+      if (question < 9) {
+        await user.click(screen.getByRole("button", { name: "Next question" }))
+      }
+    }
+
+    await user.click(screen.getByRole("button", { name: "See results" }))
+    expect(
+      screen.getByRole("heading", { name: "Quiz Result" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "9. Quiz Result" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("4 / 10")).toBeInTheDocument()
+    expect(screen.getByText("Worth another look")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "Q1. What is the correct way to create a functional component?",
+      ),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Try again" }))
+    expect(screen.getByRole("heading", { name: "Quiz" })).toBeInTheDocument()
+    expect(screen.getByText("Question 1 of 10")).toBeInTheDocument()
+  })
+
+  it("answers a lecture question from Ask AI", async () => {
+    const user = userEvent.setup()
+    render(<MyLecturesPage onHome={() => {}} onMyLectures={() => {}} />)
+
+    await user.click(screen.getByRole("tab", { name: "Ask AI" }))
+
+    expect(screen.getByRole("heading", { name: "Ask AI" })).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "10. Ask AI" }),
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByText("Explain the difference between props and state."),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/Props are values a component receives/),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: /Watch this part/ }),
+    ).toHaveAttribute("target", "_blank")
+
+    await user.click(
+      screen.getByRole("button", { name: "Summarise this lecture" }),
+    )
+    expect(
+      screen.getByText(
+        "This lecture introduces React, then components and props, and finishes with state and hooks.",
+      ),
+    ).toBeInTheDocument()
+
+    await user.type(
+      screen.getByLabelText("Ask a question about this lecture"),
+      "What is a component?",
+    )
+    await user.click(screen.getByRole("button", { name: "Send" }))
+    expect(screen.getByText("What is a component?")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "This lecture covers that idea in the sections on components, props, and hooks.",
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it("shows an empty My Lectures list", async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.click(screen.getByRole("button", { name: "See all" }))
+
+    expect(
+      screen.getByRole("heading", { name: "My Lectures" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "11. My Lectures" }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByLabelText("Search your lectures")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    expect(
+      screen.getByRole("columnheader", { name: "Length" }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Status" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+    expect(screen.queryByText("React Complete Course")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Ready" }))
+    expect(screen.getByRole("button", { name: "Ready" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+
+    await user.click(screen.getByRole("tab", { name: "Notes" }))
+    expect(
+      screen.getByRole("heading", { name: "6. Notes" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("1. Introduction to React")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("tab", { name: "All lectures" }))
+    expect(
+      screen.getByRole("heading", { name: "My Lectures" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+    expect(screen.queryByText("React Complete Course")).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Home" }))
+    await user.click(screen.getByRole("button", { name: "My Lectures" }))
+    expect(screen.getByText("No lectures yet.")).toBeInTheDocument()
+    expect(screen.getByRole("tab", { name: "All lectures" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
+  })
+
+  it("shows the preview error when YouTube cannot be reached", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")))
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole("button", { name: "Login" }))
+    await user.type(screen.getByLabelText("YouTube link"), videoUrl)
+
+    expect(
+      await screen.findByText("This YouTube link could not be loaded."),
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Loading video details…"),
+      ).not.toBeInTheDocument()
+    })
+  })
+})

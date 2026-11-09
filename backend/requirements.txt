@@ -1,3 +1,7 @@
 fastapi==0.115.12
 uvicorn==0.34.2
+<<<<<<< HEAD
 youtube-transcript-api==1.2.4
+=======
+python-dotenv==1.1.0
+>>>>>>> de33df0676daab642e4697df9d2c753ccc82c2ed

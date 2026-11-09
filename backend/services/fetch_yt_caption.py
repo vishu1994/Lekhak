@@ -10,7 +10,12 @@ from youtube_transcript_api._errors import (
     NoTranscriptFound,
 )
 
-from backend.exceptions.fetch_caption import CaptionsDisabledError, CaptionsNotFoundError, InvalidYouTubeURLError
+from backend.exceptions.fetch_caption import (
+    InvalidYouTubeURLError,
+    CaptionsNotFoundError,
+    CaptionsDisabledError,
+)
+
 
 @dataclass
 class TranscriptSegment:
@@ -177,7 +182,7 @@ if __name__ == "__main__":
 
     try:
         result = provider.fetch(
-            "https://www.youtube.com/watch?v="
+            "https://www.youtube.com/watch?v=rgHZa7-Dibg&t=1519s"
         )
 
         print(result)

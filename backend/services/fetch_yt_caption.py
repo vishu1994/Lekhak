@@ -1,4 +1,3 @@
-
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -10,6 +9,10 @@ from youtube_transcript_api._errors import (
     TranscriptsDisabled,
     NoTranscriptFound,
 )
+
+from backend.app.core.logging_config import LoggingManager
+
+logger = LoggingManager.get_logger(__name__)
 
 from backend.exceptions.fetch_caption import (
     InvalidYouTubeURLError,
@@ -121,11 +124,19 @@ class YoutubeTranscriptionApiAdapter(BaseTranscriptApi):
             )
 
         except NoTranscriptFound as exc:
+            logger.warning(
+                f"No transcript found for video_id=%s in requested languages.",
+                video_id,
+            )
             raise CaptionsNotFoundError(
                 "Captions in the requested language are not available."
             ) from exc
 
         except TranscriptsDisabled as exc:
+            logger.warning(
+                "Transcript retrieval is disabled for video_id=%s.",
+                video_id,
+            )
             raise CaptionsDisabledError(
                 "Captions are disabled for this video."
             ) from exc
@@ -138,7 +149,10 @@ class YoutubeTranscriptionApiAdapter(BaseTranscriptApi):
             )
             for segment in raw_result
         ]
-
+        logger.debug(
+            "Transcript retrieved successfully from YouTube API. video_id=%s",
+            video_id,
+        )
         return FetchedTranscript(
             language_code=raw_result.language_code,
             is_generated=raw_result.is_generated,
@@ -182,6 +196,7 @@ class YouTubeCaptionProvider:
         Raises:
             ValueError: If the URL is unsupported or the video ID is invalid.
         """
+        logger.debug("Starting YouTube URL validation.")
         parsed = urlparse(video_url)
         host = (parsed.hostname or "").lower()
 
@@ -197,8 +212,7 @@ class YouTubeCaptionProvider:
 
                 video_id = (
                     parts[1]
-                    if len(parts) == 2
-                    and parts[0] in {"shorts", "embed", "live"}
+                    if len(parts) == 2 and parts[0] in {"shorts", "embed", "live"}
                     else ""
                 )
 
@@ -208,6 +222,10 @@ class YouTubeCaptionProvider:
         if not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
             raise ValueError("Invalid YouTube video ID")
 
+        logger.debug(
+            "YouTube URL validated successfully. video_id=%s",
+            video_id,
+        )
         return video_id
 
     def fetch(self, video_url: str) -> dict[str, Any]:
@@ -236,16 +254,27 @@ class YouTubeCaptionProvider:
             video_id = self._extract_video_id(video_url)
 
         except (ValueError, TypeError) as exc:
-            raise InvalidYouTubeURLError(
-                f"Invalid video URL: {exc}"
-            ) from exc
+            logger.error(
+                "YouTube URL validation failed: %s",
+                exc,
+            )
+            raise InvalidYouTubeURLError(f"Invalid video URL: {exc}") from exc
 
         # The adapter handles third-party exceptions.
+        logger.info(
+            "Starting transcript retrieval. video_id=%s, language=%s",
+            video_id,
+            self.language,
+        )
         transcript = self.api.fetch(
             video_id,
             languages=[self.language],
         )
-
+        logger.info(
+            "Transcript retrieval completed successfully. video_id=%s, language=%s",
+            video_id,
+            transcript.language_code,
+        )
         return {
             "video_id": video_id,
             "language": transcript.language_code,
@@ -263,11 +292,9 @@ if __name__ == "__main__":
     )
 
     try:
-        result = provider.fetch(
-            "https://www.youtube.com/watch?v=rgHZa7-Dibg&t=1519s"
-        )
+        result = provider.fetch("https://www.youtube.com/watch?v=rgHZa7-Dibg&t=1519s")
 
-        print(result)
+        # print(result)
 
     except InvalidYouTubeURLError as exc:
         print(f"Invalid URL: {exc}")

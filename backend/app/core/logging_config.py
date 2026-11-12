@@ -5,6 +5,7 @@ from threading import Lock
 
 from dotenv import load_dotenv
 
+
 # Load backend/.env once so LOG_LEVEL and later settings are available.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
